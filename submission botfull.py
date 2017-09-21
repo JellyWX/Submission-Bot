@@ -14,19 +14,39 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+    #first time setup
+    if message.content.startswith('%setup'):
+            global questions
+            questions = []
+            for n in range(1,4):
+                su1 = discord.Embed(description='Please enter question:' + str(n), colour=0xff5050)
+                await client.send_message(message.channel, embed=su1)
+                question1 = await client.wait_for_message(author=message.author,channel=message.channel)
+                questions.append(question1.content)
+            with open('QuestionOptions', 'a') as f:
+                for file in questions:
+                    open('QuestionOptions','w').close()
+                    f.write(file + ',')
+
+        
+        
+   
+    #startup
     if message.content.startswith('%submit'):
+        #introduction/instructions
         em = discord.Embed(title='---------------NEW-SUBMISSION---------------', description='''Please fill out the questiions in this form to submit a bot-request.
 Please start all your answers with the prefex "%".
 Type "%start" to start your submission.''', colour=0xff5050)
         await client.send_message(message.channel, embed=em)
-    #first question
+  
     if message.content.startswith('%start'):
-        em2 = discord.Embed(description='What is your discord name?', colour=0xff5050)
-        await client.send_message(message.channel, embed=em2)
-        ans1 = await client.wait_for_message(author=message.author,channel=message.channel)
-        em3 = discord.Embed(description='Thank You, Could you please describe what your bot does in detail?', colour=0xff5050)
-        await client.send_message(message.channel, embed=em3)
-        ans2 = await client.wait_for_message(author=message.author,channel=message.channel)
+        with open('QuestionOptions', 'r') as f:
+            file_questions = f.read()
+        for mainQuestion in file_questions.split(','):
+            em2 = discord.Embed(description=mainQuestion, colour=0xff5050)
+            await client.send_message(message.channel, embed=em2)
+            ans1 = await client.wait_for_message(author=message.author,channel=message.channel)
+
         
         
 
@@ -39,7 +59,7 @@ Type "%start" to start your submission.''', colour=0xff5050)
             with open('Submission', 'a') as f:
                 f.write(ans1.content + '\r\n -----------QUESTION2----------- \r\n' + ans2.content)
         elif mesFinal.content =='%no':
-            await client.send_message(message.channel, 'Well... What a fucking waste of time that was!')
+            await client.send_message(message.channel, '**Your application has not been submitted**')
         else:
             await client.send_message(message.channel, 'Error')
         
